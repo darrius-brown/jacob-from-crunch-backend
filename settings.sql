@@ -1,0 +1,3 @@
+CREATE DATABASE jacob;
+CREATE USER jacobuser WITH PASSWORD 'jacob';
+GRANT ALL PRIVILEGES ON DATABASE jacob TO jacobuser;
