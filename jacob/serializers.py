@@ -14,14 +14,17 @@ class UserSerializer(serializers.ModelSerializer):
 
         user = UserModel.objects.create_user(
             username=validated_data['username'],
-            password=validated_data['password']
+            password=validated_data['password'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
+            email=validated_data['email'],
         )
 
         return user
 
     class Meta:
         model = UserModel
-        fields = ('id', 'username', "password")
+        fields = ('id', 'username', "password", 'first_name', 'last_name', 'email')
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
