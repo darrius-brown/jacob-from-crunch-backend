@@ -10,18 +10,18 @@ class UserSerializer(serializers.ModelSerializer):
 
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
 
-def create(self, validated_data):
+    def create(self, validated_data):
 
-    user = UserModel.objects.create_user(
-        username=validated_data['username'],
-        password=validated_data['password']
-    )
+        user = UserModel.objects.create_user(
+            username=validated_data['username'],
+            password=validated_data['password']
+        )
 
-    return user
+        return user
 
-class Meta:
-    model = UserModel
-    fields = ('id', 'username', "password")
+    class Meta:
+        model = UserModel
+        fields = ('id', 'username', "password")
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
