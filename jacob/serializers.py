@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import Exercise
+from .models import Exercise, Program
 
 UserModel = User
 
@@ -30,6 +30,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = UserModel
         fields = ('id', 'username', "password", 'first_name', 'last_name', 'email')
 
+
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     
 
@@ -45,13 +46,11 @@ class ExerciseSerializer(serializers.HyperlinkedModelSerializer):
         model = Exercise
         fields = ('name', 'category', 'bodypart')
 
-class LowerSerializer(serializers.ModelSerializer):
+class ProgramSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    exercise = serializers.SlugRelatedField(many=True, queryset=Exercise.objects.all(), slug_field='name')
+
     class Meta:
-        model = Exercise
+        model = Program
         fields = '__all__'
 
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        if data['category'] != 'Lower':
-            return None
-        return data
