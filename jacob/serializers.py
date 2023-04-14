@@ -41,10 +41,10 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['username'] = user.username
         return token
 
-class ExerciseSerializer(serializers.HyperlinkedModelSerializer):
+class ExerciseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Exercise
-        fields = ('name', 'category', 'bodypart')
+        fields = '__all__'
 
 class ProgramSerializer(serializers.ModelSerializer):
     user = UserSerializer()

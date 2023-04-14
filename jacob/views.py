@@ -10,8 +10,38 @@ class CreateUser(generics.CreateAPIView):
 
 class ExerciseList(generics.ListCreateAPIView):
   serializer_class = ExerciseSerializer
-  queryset = Exercise.objects.all()
+  queryset = Exercise.objects.all().order_by('id')
   permission_classes = [permissions.AllowAny]
+
+class ExerciseListByCategory(generics.ListCreateAPIView):
+  serializer_class = ExerciseSerializer
+  permission_classes = [permissions.AllowAny]
+
+  def get_queryset(self):
+    category = self.kwargs['category']
+    queryset = Exercise.objects.filter(category=category).order_by('id')
+    return queryset
+
+class ExerciseListByCategoryAndBodyGroup(generics.ListCreateAPIView):
+  serializer_class = ExerciseSerializer
+  permission_classes = [permissions.AllowAny]
+
+  def get_queryset(self):
+    category = self.kwargs['category']
+    bodygroup = self.kwargs['bodygroup']
+    queryset = Exercise.objects.filter(category=category, muscle_joint_group=bodygroup).order_by('id')
+    return queryset
+
+class ExerciseListByCategoryAndBodyGroupAndMuscle(generics.ListCreateAPIView):
+  serializer_class = ExerciseSerializer
+  permission_classes = [permissions.AllowAny]
+
+  def get_queryset(self):
+    category = self.kwargs['category']
+    bodygroup = self.kwargs['bodygroup']
+    muscle = self.kwargs['muscle']
+    queryset = Exercise.objects.filter(category=category, muscle_joint_group=bodygroup, muscle=muscle).order_by('id')
+    return queryset
 
 class ProgramList(generics.ListCreateAPIView):
   serializer_class = ProgramSerializer
@@ -19,7 +49,6 @@ class ProgramList(generics.ListCreateAPIView):
   permission_classes = [permissions.AllowAny]
 
 class ProgramDetail(generics.RetrieveUpdateDestroyAPIView):
-  
   serializer_class = ProgramSerializer
   permission_classes = [permissions.AllowAny]
 
@@ -33,6 +62,7 @@ class ProgramDetail(generics.RetrieveUpdateDestroyAPIView):
 
   def delete(self, request, *args, **kwargs):
     return self.destroy(request, *args, **kwargs)
+
 
 
 

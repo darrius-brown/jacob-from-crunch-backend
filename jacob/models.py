@@ -7,6 +7,7 @@ class Exercise(models.Model):
     compound = models.BooleanField(default=True)
     isloation = models.BooleanField(default=True)
     muscle = models.CharField(max_length=100, default='muscle')
+    muscle_joint_group = models.CharField(max_length=100, default='none')
 
     def __str__(self):
         return self.name
