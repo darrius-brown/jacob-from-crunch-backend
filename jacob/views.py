@@ -43,18 +43,28 @@ class ExerciseListByCategoryAndBodyGroupAndMuscle(generics.ListCreateAPIView):
     queryset = Exercise.objects.filter(category=category, muscle_joint_group=bodygroup, muscle=muscle).order_by('id')
     return queryset
 
+# class ProgramList(generics.ListCreateAPIView):
+#   serializer_class = ProgramSerializer
+#   queryset = Program.objects.all().order_by('id')
+#   permission_classes = [permissions.AllowAny]
+
 class ProgramList(generics.ListCreateAPIView):
   serializer_class = ProgramSerializer
-  queryset = Program.objects.all()
   permission_classes = [permissions.AllowAny]
+  def get_queryset(self):
+      username = self.kwargs['username']
+      queryset = Program.objects.filter(user__username=username).order_by('day')
+      return queryset
 
 class ProgramDetail(generics.RetrieveUpdateDestroyAPIView):
   serializer_class = ProgramSerializer
   permission_classes = [permissions.AllowAny]
+  lookup_field = 'day'
 
   def get_queryset(self):
         username = self.kwargs['username']
-        queryset = Program.objects.filter(username=username)
+        day = self.kwargs['day']
+        queryset = Program.objects.filter(user__username=username, day=day)
         return queryset
 
   def put(self, request, *args, **kwargs):
