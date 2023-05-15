@@ -1,5 +1,7 @@
 from rest_framework import generics, permissions
 from .models import Exercise, Program
+from rest_framework import status
+from rest_framework.response import Response
 from django.contrib.auth import get_user_model, authenticate, logout, login
 from .serializers import UserSerializer, ExerciseSerializer, ProgramSerializer
 
@@ -8,12 +10,28 @@ class CreateUser(generics.CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
 
-class ExerciseList(generics.ListCreateAPIView):
+class ExerciseList(generics.ListAPIView):
   serializer_class = ExerciseSerializer
   queryset = Exercise.objects.all().order_by('id')
   permission_classes = [permissions.AllowAny]
 
-class ExerciseListByCategory(generics.ListCreateAPIView):
+class CreateExercise(generics.CreateAPIView):
+   serializer_class = ExerciseSerializer
+   permission_classes = [permissions.AllowAny]
+
+class CreateProgram(generics.CreateAPIView):
+   serializer_class = ProgramSerializer
+   permission_classes = [permissions.AllowAny]
+
+   def post(self, request, user_id, format=None):
+        user_id = self.kwargs['user_id']
+        serializer = ProgramSerializer(data=request.data, context={'user_id': user_id})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ExerciseListByCategory(generics.ListAPIView):
   serializer_class = ExerciseSerializer
   permission_classes = [permissions.AllowAny]
 
@@ -22,7 +40,7 @@ class ExerciseListByCategory(generics.ListCreateAPIView):
     queryset = Exercise.objects.filter(category=category).order_by('id')
     return queryset
 
-class ExerciseListByCategoryAndBodyGroup(generics.ListCreateAPIView):
+class ExerciseListByCategoryAndBodyGroup(generics.ListAPIView):
   serializer_class = ExerciseSerializer
   permission_classes = [permissions.AllowAny]
 
@@ -32,7 +50,7 @@ class ExerciseListByCategoryAndBodyGroup(generics.ListCreateAPIView):
     queryset = Exercise.objects.filter(category=category, muscle_joint_group=bodygroup).order_by('id')
     return queryset
 
-class ExerciseListByCategoryAndBodyGroupAndMuscle(generics.ListCreateAPIView):
+class ExerciseListByCategoryAndBodyGroupAndMuscle(generics.ListAPIView):
   serializer_class = ExerciseSerializer
   permission_classes = [permissions.AllowAny]
 
@@ -48,7 +66,7 @@ class ExerciseListByCategoryAndBodyGroupAndMuscle(generics.ListCreateAPIView):
 #   queryset = Program.objects.all().order_by('id')
 #   permission_classes = [permissions.AllowAny]
 
-class ProgramList(generics.ListCreateAPIView):
+class ProgramList(generics.ListAPIView):
   serializer_class = ProgramSerializer
   permission_classes = [permissions.AllowAny]
   def get_queryset(self):
