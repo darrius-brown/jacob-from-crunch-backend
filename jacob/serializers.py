@@ -62,6 +62,7 @@ class ProgramSerializer(serializers.ModelSerializer):
         user = User.objects.get(id=user_id)
 
         exercises_data = validated_data.pop('exercise')
+        print(exercises_data)
         program = Program.objects.create( 
             user=user, 
             **validated_data)

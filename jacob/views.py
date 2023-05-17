@@ -61,11 +61,6 @@ class ExerciseListByCategoryAndBodyGroupAndMuscle(generics.ListAPIView):
     queryset = Exercise.objects.filter(category=category, muscle_joint_group=bodygroup, muscle=muscle).order_by('id')
     return queryset
 
-# class ProgramList(generics.ListCreateAPIView):
-#   serializer_class = ProgramSerializer
-#   queryset = Program.objects.all().order_by('id')
-#   permission_classes = [permissions.AllowAny]
-
 class ProgramList(generics.ListAPIView):
   serializer_class = ProgramSerializer
   permission_classes = [permissions.AllowAny]
