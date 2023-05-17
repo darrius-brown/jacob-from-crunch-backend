@@ -54,26 +54,18 @@ class UserForProgramSerializer(serializers.ModelSerializer):
 
 class ProgramSerializer(serializers.ModelSerializer):
     user = UserForProgramSerializer()
-    exercise = serializers.SlugRelatedField(many=True, queryset=Exercise.objects.all(), slug_field='name')
+    exercise = serializers.PrimaryKeyRelatedField(many=True, queryset=Exercise.objects.all())
 
     def create (self, validated_data):
-        exercise = {}
         user_data = validated_data.pop('user')
-        exercise_data= validated_data.pop('exercise')
         user_id = self.context.get('user_id')
         user = User.objects.get(id=user_id)
 
-        exercise_serializer = ExerciseSerializer(data=exercise_data)
-        exercise_serializer.is_valid(raise_exception=True)
-        exercises = exercise_serializer.save()
-
-        for exercise in exercises:
-            print(exercise)
-
+        exercises_data = validated_data.pop('exercise')
         program = Program.objects.create( 
             user=user, 
             **validated_data)
-        
+        program.exercise.set(exercises_data)
         return program
 
     class Meta:
