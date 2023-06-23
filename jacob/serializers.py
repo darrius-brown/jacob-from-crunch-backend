@@ -52,10 +52,38 @@ class UserForProgramSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'email')
 
+class ExerciseNameField(serializers.PrimaryKeyRelatedField):
+    def to_representation(self, value):
+        if isinstance(value, Exercise):
+            return value.name
+        exercise = Exercise.objects.get(pk=value)
+        return exercise.name
+
+    def to_internal_value(self, data):
+        try:
+            return int(data)
+        except ValueError:
+            exercise = Exercise.objects.get(name=data)
+            return exercise.pk
+
 class ProgramSerializer(serializers.ModelSerializer):
     user = UserForProgramSerializer()
-    exercise = serializers.PrimaryKeyRelatedField(many=True, queryset=Exercise.objects.all())
+    exercise = ExerciseNameField(many=True, read_only=False, queryset=Exercise.objects.all())
 
+    def to_internal_value(self, data):
+        if isinstance(data, list):
+            exercise_names = data
+            exercise_ids = [
+                Exercise.objects.get(name=name).pk
+                for name in exercise_names
+            ]
+            return exercise_ids
+        elif isinstance(data, str):
+            exercise_name = data
+            exercise_id = Exercise.objects.get(name=exercise_name).pk
+            return exercise_id
+        return super().to_internal_value(data)
+    
     def create (self, validated_data):
         user_data = validated_data.pop('user')
         user_id = self.context.get('user_id')
@@ -68,6 +96,19 @@ class ProgramSerializer(serializers.ModelSerializer):
             **validated_data)
         program.exercise.set(exercises_data)
         return program
+    
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user', None)
+        if user_data:
+            user_serializer = UserForProgramSerializer()
+            user_serializer.update(instance.user, user_data)
+
+        exercise_data = validated_data.pop('exercise', None)
+        if exercise_data is not None:
+            instance.exercise.clear()
+            instance.exercise.add(*exercise_data)  
+
+        return super().update(instance, validated_data)
 
     class Meta:
         model = Program
