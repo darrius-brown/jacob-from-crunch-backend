@@ -30,7 +30,6 @@ class UserSerializer(serializers.ModelSerializer):
         model = UserModel
         fields = ('id', 'username', "password", 'first_name', 'last_name', 'email')
 
-
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     
 

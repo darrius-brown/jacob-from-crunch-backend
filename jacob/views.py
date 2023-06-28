@@ -4,11 +4,41 @@ from rest_framework import status
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model, authenticate, logout, login
 from .serializers import UserSerializer, ExerciseSerializer, ProgramSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 
 class CreateUser(generics.CreateAPIView):
     model = get_user_model()
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
+
+class LoginView(TokenObtainPairView):
+    serializer_class = TokenObtainPairSerializer
+
+    def post(self, request, *args, **kwargs):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        if not username:
+           return Response('Username can\'t be blank.')
+        user = authenticate(request, username=username, password=password)
+
+        if user is None:
+            return Response({'error': 'Invalid username/password'}, status=400)
+
+        refresh = RefreshToken.for_user(user)
+
+        data = {
+            'user_id': user.id,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }
+
+        return Response(data)
 
 class ExerciseList(generics.ListAPIView):
   serializer_class = ExerciseSerializer
