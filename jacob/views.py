@@ -51,37 +51,42 @@ class CreateExercise(generics.CreateAPIView):
    serializer_class = ExerciseSerializer
    permission_classes = [permissions.AllowAny]
 
-# class CreateProgram(generics.CreateAPIView):
-  #  serializer_class = ProgramSerializer
-  #  permission_classes = [permissions.AllowAny]
-
-  #  def post(self, request, user_id, format=None):
-  #       user_id = self.kwargs['user_id']
-  #       serializer = ProgramSerializer(data=request.data, context={'user_id': user_id})
-  #       if serializer.is_valid():
-  #           serializer.save()
-  #           return Response(serializer.data, status=status.HTTP_201_CREATED)
-  #       return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 class CreateProgram(generics.CreateAPIView):
     serializer_class = ProgramSerializer
     permission_classes = [permissions.AllowAny]
 
-    def post(self, request, user_id, format=None):
+    def post(self, request, user_id, program, format=None):
         user_id = self.kwargs['user_id']
+        program = self.kwargs['program']
+        exercise_ids =  {'1': [[30, 40, 43, 1, 17, 13, 44, 8, 31]],
+                         '2': [[30, 40, 43, 1, 17, 13, 4, 34, 45, 44, 6, 38, 8, 31]],
+                         '3': [[30, 43, 17, 4, 6, 45, 8], [40, 1, 13, 34, 44, 38, 31]],
+                         '4': [[30, 43, 17, 4, 6, 45, 8, 36, 16, 7], [40, 1, 13, 34, 19, 34, 44, 38, 31]],
+                         '5': [[30, 43, 17, 4, 6, 45, 8], [40, 1, 13, 34, 44, 38, 31], [30, 43, 17, 4, 6, 45, 8]],
+                         '6': [[30, 43, 17, 4, 6, 45, 8, 36, 16, 7], [40, 1, 13, 34, 19, 34, 44, 38, 31], [30, 43, 17, 4, 6, 45, 8, 36, 16, 7]],
+                         '7': [[30, 43, 17, 4, 6, 45, 8], [40, 1, 13, 34, 44, 38, 31], [30, 43, 17, 4, 6, 45, 8], [40, 1, 13, 34, 44, 38, 31]],
+                         '8': [[30, 43, 17, 4, 6, 45, 8, 36, 16, 7], [40, 1, 13, 34, 19, 34, 44, 38, 31], [30, 43, 17, 4, 6, 45, 8, 36, 16, 7], [40, 1, 13, 34, 19, 34, 44, 38, 31]]
+                         }
 
-        # Get six random exercises
-        exercises = sample(list(Exercise.objects.filter(category='Lower')), 2)
-        exercise_ids = [exercise.id for exercise in exercises]
+        program_data = exercise_ids[str(program)]
+        if isinstance(program_data, list): 
+            for exercises in program_data:
+                request.data['exercise'] = exercises
+                serializer = ProgramSerializer(data=request.data, context={'user_id': user_id})
+                if serializer.is_valid():
+                    serializer.save()
+                else:
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else: 
+            request.data['exercise'] = program_data
+            serializer = ProgramSerializer(data=request.data, context={'user_id': user_id})
+            if serializer.is_valid():
+                serializer.save()
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # Add exercise ids to request data
-        request.data['exercise'] = exercise_ids
-
-        serializer = ProgramSerializer(data=request.data, context={'user_id': user_id})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
 class ExerciseListByCategory(generics.ListAPIView):
   serializer_class = ExerciseSerializer
   permission_classes = [permissions.AllowAny]
@@ -101,6 +106,16 @@ class ExerciseListByCategoryAndBodyGroup(generics.ListAPIView):
     queryset = Exercise.objects.filter(category=category, muscle_joint_group=bodygroup).order_by('id')
     return queryset
 
+class ExerciseListByCategoryAndMuscle(generics.ListAPIView):
+  serializer_class = ExerciseSerializer
+  permission_classes = [permissions.AllowAny]
+
+  def get_queryset(self):
+    category = self.kwargs['category']
+    muscle = self.kwargs['muscle']
+    queryset = Exercise.objects.filter(category=category, muscle=muscle).order_by('id')
+    return queryset
+  
 class ExerciseListByCategoryAndBodyGroupAndMuscle(generics.ListAPIView):
   serializer_class = ExerciseSerializer
   permission_classes = [permissions.AllowAny]
@@ -117,18 +132,16 @@ class ProgramList(generics.ListAPIView):
   permission_classes = [permissions.AllowAny]
   def get_queryset(self):
       username = self.kwargs['username']
-      queryset = Program.objects.filter(user__username=username).order_by('day')
+      queryset = Program.objects.filter(user__username=username).order_by('id')
       return queryset
 
 class ProgramDetail(generics.RetrieveUpdateDestroyAPIView):
   serializer_class = ProgramSerializer
   permission_classes = [permissions.AllowAny]
-  lookup_field = 'day'
 
   def get_queryset(self):
         username = self.kwargs['username']
-        day = self.kwargs['day']
-        queryset = Program.objects.filter(user__username=username, day=day)
+        queryset = Program.objects.filter(user__username=username)
         return queryset
 
   def put(self, request, *args, **kwargs):
