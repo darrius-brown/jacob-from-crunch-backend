@@ -141,7 +141,8 @@ class ProgramDetail(generics.RetrieveUpdateDestroyAPIView):
 
   def get_queryset(self):
         username = self.kwargs['username']
-        queryset = Program.objects.filter(user__username=username)
+        pk = self.kwargs['pk']
+        queryset = Program.objects.filter(user__username=username, pk=pk)
         return queryset
 
   def put(self, request, *args, **kwargs):

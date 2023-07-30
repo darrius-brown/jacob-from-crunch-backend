@@ -54,9 +54,9 @@ class UserForProgramSerializer(serializers.ModelSerializer):
 class ExerciseNameField(serializers.PrimaryKeyRelatedField):
     def to_representation(self, value):
         if isinstance(value, Exercise):
-            return value.name
+            return (value.id, value.name)
         exercise = Exercise.objects.get(pk=value)
-        return exercise.name
+        return (exercise.id, exercise.name)
 
     def to_internal_value(self, data):
         try:

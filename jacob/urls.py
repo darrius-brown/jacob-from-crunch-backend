@@ -13,5 +13,5 @@ urlpatterns = [
     # path('exercise/<str:category>/<str:muscle>/', views.ExerciseListByCategoryAndMuscle.as_view(), name='exercise_read_by_category_and_muscle'),
     path('exercise/<str:category>/<str:bodygroup>/<str:muscle>/', views.ExerciseListByCategoryAndBodyGroupAndMuscle.as_view(), name='exercise_read_by_category_and_group_and_muscle'),
     path('program/<str:username>/', views.ProgramList.as_view(), name='program_read'),
-    path('program/<str:username>/<int:day>/', views.ProgramDetail.as_view(), name='program_detail'),   
+    path('program/<str:username>/<int:pk>/', views.ProgramDetail.as_view(), name='program_detail'),   
 ]
